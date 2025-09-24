@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expo Aprígio - Cultura de Prevenção</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0065B1;
+      --primary-dark: #00457E;
+      --secondary: #FF7F00;
+      --secondary-dark: #E57200;
+      --light: #F2F8FD;
+      --dark: #1A2E40;
+      --gradient-blue: linear-gradient(135deg, #0065B1, #0085F2);
+      --gradient-orange: linear-gradient(135deg, #FF7F00, #FF9E1B);
+      --gradient-dark: linear-gradient(135deg, #1A2E40, #2C3E50);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--gradient-blue);
+      color: white;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    /* ===== CONTADOR EM DIAGONAL ===== */
+    .diagonal-counter {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 180px;
+      overflow: hidden;
+      z-index: 1001;
+      pointer-events: none;
+    }
+
+    .counter-corner {
+      position: absolute;
+      top: -90px;
+      right: -90px;
+      width: 180px;
+      height: 180px;
+      transform: rotate(45deg);
+      background: var(--gradient-orange);
+      box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 40px;
+      padding-left: 40px;
+      pointer-events: auto;
+      transition: all 0.3s ease;
+    }
+
+    .counter-corner:hover {
+      background: var(--secondary-dark);
+      width: 190px;
+      height: 190px;
+    }
+
+    .counter-content {
+      transform: rotate(-45deg);
+      text-align: center;
+      color: white;
+      width: 100px;
+    }
+
+    .counter-days {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 5px;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .counter-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+
+    .counter-full {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 1002;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--secondary);
+      box-shadow: 0 0 25px rgba(255, 127, 0, 0.5);
+      width: 300px;
+    }
+
+    .counter-full .timer {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+
+    .counter-full .timer-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 5px;
+      min-width: 60px;
+    }
+
+    .counter-full .timer-number {
+      font-size: 1.8rem;
+      font-family: 'Orbitron', sans-serif;
+      color: var(--secondary);
+    }
+
+    .counter-full .timer-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+
+    .close-full-counter {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* ===== HEADER E MENU ===== */
+    header {
+      background: rgba(0, 101, 177, 0.9);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo img {
+      height: 70px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.05);
+    }
+
+    .logo h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      background: var(--gradient-orange);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 0.8rem;
+      border-radius: 20px;
+      transition: 0.3s;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background: var(--gradient-orange);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.8rem;
+      color: white;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* ===== INFORMAÇÕES DO EVENTO ===== */
+    .evento-info {
+      background: var(--gradient-orange);
+      padding: 15px 0;
+      text-align: center;
+    }
+
+    .evento-info .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      font-weight: 500;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 40px;
+      color: white;
+    }
+
+    .hero h2 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 25px;
+      background: var(--gradient-orange);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 126, 0, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(255, 126, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid white;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ===== DESTAQUES ===== */
+    .destaques {
+      padding: 60px 20px;
+      background: var(--light);
+    }
+
+    .destaques h2 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+      color: var(--dark);
+    }
+
+    .grid-trabalhos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .card-trabalho {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-trabalho:hover {
+      transform: translateY(-7px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-img {
+      height: 160px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--gradient-blue);
+      color: white;
+      font-size: 3.5rem;
+    }
+
+    .card-content {
+      padding: 25px;
+    }
+
+    .card-content h3 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+
+    .btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-top: 15px;
+      transition: gap 0.3s ease;
+    }
+
+    .btn-link:hover {
+      gap: 12px;
+    }
+
+    /* ===== VÍDEOS DO YOUTUBE ===== */
+    .videos {
+      padding: 60px 20px;
+      background: var(--gradient-dark);
+      color: white;
+    }
+
+    .videos h2 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+    }
+
+    .videos-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .video-item {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .video-item:hover {
+      transform: translateY(-5px);
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* Proporção 16:9 */
+      height: 0;
+      overflow: hidden;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .video-info {
+      padding: 20px;
+    }
+
+    .video-info h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      color: var(--secondary);
+    }
+
+    .video-info p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    /* ===== DICAS INTERATIVAS ===== */
+    .dicas {
+      padding: 60px 20px;
+      background: var(--light);
+    }
+
+    .dicas h2 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 40px;
+      color: var(--dark);
+    }
+
+    .dicas-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+
+    .dica-card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      transition: transform 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dica-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .dica-icon {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: var(--secondary);
+    }
+
+    .dica-card h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .dica-detalhes {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .dica-card.ativo .dica-detalhes {
+      max-height: 200px;
+    }
+
+    /* ===== QUIZ PREVIEW ===== */
+    .quiz-preview {
+      padding: 60px 20px;
+      background: var(--gradient-blue);
+      color: white;
+    }
+
+    .quiz-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .quiz-text h2 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+    }
+
+    .quiz-image {
+      display: flex;
+      justify-content: center;
+    }
+
+    .quiz-visual {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      max-width: 300px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+    }
+
+    .quiz-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .quiz-visual h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    /* ===== NEWSLETTER ===== */
+    .newsletter {
+      padding: 60px 20px;
+      background: var(--gradient-orange);
+      color: white;
+      text-align: center;
+    }
+
+    .newsletter h2 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+    }
+
+    .newsletter p {
+      max-width: 600px;
+      margin: 0 auto 30px;
+      font-size: 1.1rem;
+    }
+
+    .newsletter-form {
+      display: flex;
+      max-width: 500px;
+      margin: 0 auto;
+      gap: 10px;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .newsletter-input {
+      width: 100%;
+      padding: 15px 20px;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .newsletter-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 127, 0, 0.3);
+    }
+
+    .newsletter .btn {
+      margin-top: 10px;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--dark);
+      color: white;
+      padding: 50px 0 20px;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .footer-section h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      color: var(--secondary);
+    }
+
+    .footer-section p {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-section ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .footer-section ul li {
+      margin-bottom: 12px;
+    }
+
+    .footer-section ul li a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: color 0.3s ease;
+    }
+
+    .footer-section ul li a:hover {
+      color: var(--secondary);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+      background: var(--secondary);
+      transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .school-info {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .school-info i {
+      margin-right: 8px;
+      color: var(--secondary);
+    }
+
+    /* ===== RESPONSIVIDADE ===== */
+    @media (max-width: 992px) {
+      .quiz-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 30px;
+      }
+      
+      .hero h2 {
+        font-size: 2.2rem;
+      }
+      
+      .logo h1 {
+        font-size: 1.5rem;
+      }
+      
+      nav a {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.9rem;
+      }
+
+      .newsletter-form {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 850px) {
+      .header-container {
+        flex-wrap: wrap;
+      }
+      
+      .logo {
+        flex-basis: 70%;
+      }
+      
+      .menu-toggle {
+        display: block;
+        order: 2;
+      }
+      
+      nav {
+        order: 3;
+        flex-basis: 100%;
+        display: none;
+      }
+      
+      nav ul.menu-show {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 15px;
+        animation: fadeIn 0.3s ease;
+      }
+      
+      nav ul.menu {
+        display: none;
+      }
+      
+      .diagonal-counter {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .counter-corner {
+        width: 150px;
+        height: 150px;
+        top: -75px;
+        right: -75px;
+        padding-bottom: 35px;
+        padding-left: 35px;
+      }
+      
+      .counter-days {
+        font-size: 1.5rem;
+      }
+      
+      .counter-label {
+        font-size: 0.7rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .logo h1 {
+        font-size: 1.8rem;
+      }
+      
+      .hero h2 {
+        font-size: 1.8rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+      
+      .evento-info .container {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo h1 {
+        font-size: 1.5rem;
+      }
+      
+      .grid-trabalhos {
+        grid-template-columns: 1fr;
+      }
+      
+      .dicas-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .videos-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .diagonal-counter {
+        width: 130px;
+        height: 130px;
+      }
+      
+      .counter-corner {
+        width: 130px;
+        height: 130px;
+        top: -65px;
+        right: -65px;
+        padding-bottom: 30px;
+        padding-left: 30px;
+      }
+      
+      .counter-days {
+        font-size: 1.3rem;
+      }
+      
+      .counter-label {
+        font-size: 0.65rem;
+      }
+      
+      .counter-content {
+        width: 80px;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== CONTADOR EM DIAGONAL ===== -->
+  <div class="diagonal-counter">
+    <div class="counter-corner" id="counter-corner">
+      <div class="counter-content">
+        <div class="counter-days" id="counter-days">00</div>
+        <div class="counter-label">Dias Restantes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL CONTADOR COMPLETO ===== -->
+  <div class="counter-full" id="counter-full">
+    <button class="close-full-counter" id="close-full-counter">&times;</button>
+    <h3>Faltam para o evento:</h3>
+    <div class="timer">
+      <div class="timer-item"><div class="timer-number" id="full-dias">00</div><div class="timer-label">Dias</div></div>
+      <div class="timer-item"><div class="timer-number" id="full-horas">00</div><div class="timer-label">Horas</div></div>
+      <div class="timer-item"><div class="timer-number" id="full-minutos">00</div><div class="timer-label">Minutos</div></div>
+      <div class="timer-item"><div class="timer-number" id="full-segundos">00</div><div class="timer-label">Segundos</div></div>
+    </div>
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <div class="container header-container">
+      <div class="logo">
+        <img src="logo.png" alt="Logotipo Expo Aprígio">
+        <h1>Expo Aprígio</h1>
+      </div>
+
+      <button class="menu-toggle" aria-label="Abrir menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <nav>
+        <ul class="menu">
+          <li><a href="index.html" class="active"><i class="fas fa-home"></i> Início</a></li>
+          <li><a href="trabalhos.html"><i class="fas fa-project-diagram"></i> Trabalhos</a></li>
+          <li><a href="quiz.html"><i class="fas fa-question-circle"></i> Quiz</a></li>
+          <li><a href="#videos"><i class="fas fa-video"></i> Vídeos</a></li>
+          <li><a href="prevencao.html"><i class="fas fa-shield-alt"></i> Prevenção</a></li>
+          <li><a href="contato.html"><i class="fas fa-envelope"></i> Contato</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== INFORMAÇÕES DO EVENTO ===== -->
+  <section class="evento-info">
+    <div class="container">
+      <div class="info-item"><i class="fas fa-calendar-alt"></i> <span>25 de Outubro de 2025</span></div>
+      <div class="info-item"><i class="fas fa-clock"></i> <span>Das 10h às 14h</span></div>
+      <div class="info-item"><i class="fas fa-map-marker-alt"></i> <span>ETEC Professor Aprígio Gonzaga</span></div>
+    </div>
+  </section>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero">
+    <div class="container">
+      <h2>Cultura de Prevenção</h2>
+      <p>Explore os trabalhos da nossa turma sobre Defesa Civil e teste seus conhecimentos com nosso quiz interativo. Juntos na construção de uma sociedade mais segura e preparada.</p>
+
+      <div class="cta-buttons">
+        <a href="trabalhos.html" class="btn"><i class="fas fa-project-diagram"></i> Ver Trabalhos</a>
+        <a href="quiz.html" class="btn"><i class="fas fa-play"></i> Iniciar Quiz</a>
+        <a href="#videos" class="btn btn-secondary"><i class="fas fa-video"></i> Ver Vídeos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DESTAQUES ===== -->
+  <section class="destaques">
+    <div class="container">
+      <h2>Trabalhos em Destaque</h2>
+      <div class="grid-trabalhos">
+        <div class="card-trabalho">
+          <div class="card-img"><i class="fas fa-house-damage"></i></div>
+          <div class="card-content">
+            <h3>Prevenção de Desastres</h3>
+            <p>Projeto sobre medidas preventivas para desastres naturais em áreas urbanas.</p>
+            <a href="#" class="btn-link">Ver detalhes <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="card-trabalho">
+          <div class="card-img"><i class="fas fa-route"></i></div>
+          <div class="card-content">
+            <h3>Plano de Evacuação</h3>
+            <p>Planejamento de rotas de fuga e pontos de encontro para emergências.</p>
+            <a href="#" class="btn-link">Ver detalhes <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="card-trabalho">
+          <div class="card-img"><i class="fas fa-bell"></i></div>
+          <div class="card-content">
+            <h3>Alertas Emergenciais</h3>
+            <p>Sistema de comunicação em situações de emergência para comunidades.</p>
+            <a href="#" class="btn-link">Ver detalhes <i class="fas fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VÍDEOS DO YOUTUBE ===== -->
+  <section id="videos" class="videos">
+    <div class="container">
+      <h2>Vídeos da Defesa Civil</h2>
+      <div class="videos-container">
+        <div class="video-item">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/pkqauQyISqE" title="Vídeo 1 - Expo Aprígio" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="video-info">
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+        
+        <div class="video-item">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/nqH3DfHCtTI" title="Vídeo 2 - Expo Aprígio" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="video-info">
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+        
+        <div class="video-item">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/Ly-LuhoAsGE" title="Vídeo 3 - Expo Aprígio" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="video-info">
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+        
+        <div class="video-item">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/epq20Vv7Wp8" title="Vídeo 4 - Expo Aprígio" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="video-info">
+            <h3></h3>
+            <p></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DICAS INTERATIVAS ===== -->
+  <section class="dicas">
+    <div class="container">
+      <h2>Dicas de Prevenção Interativas</h2>
+      <div class="dicas-container">
+        <div class="dica-card" onclick="toggleDica(this)">
+          <div class="dica-icon"><i class="fas fa-house-tsunami"></i></div>
+          <h3>Enchentes</h3>
+          <p>Mantenha boias e coletes salva-vidas. Evite áreas de risco.</p>
+          <div class="dica-detalhes">
+            <p><strong>Como se preparar:</strong> Tenha um kit de emergência com documentos, medicamentos e alimentos não perecíveis.</p>
+            <p><strong>Durante enchentes:</strong> Evite contato com a água, que pode estar contaminada ou energizada.</p>
+          </div>
+        </div>
+        <div class="dica-card" onclick="toggleDica(this)">
+          <div class="dica-icon"><i class="fas fa-fire"></i></div>
+          <h3>Incêndios</h3>
+          <p>Tenha extintores e verifique fiação elétrica.</p>
+          <div class="dica-detalhes">
+            <p><strong>Prevenção:</strong> Não sobrecarregue tomadas, mantenha produtos inflamáveis longe do calor.</p>
+            <p><strong>Em caso de incêndio:</strong> Mantenha-se abaixado, cubra nariz e boca com pano úmido.</p>
+          </div>
+        </div>
+        <div class="dica-card" onclick="toggleDica(this)">
+          <div class="dica-icon"><i class="fas fa-house-crack"></i></div>
+          <h3>Deslizamentos</h3>
+          <p>Observe rachaduras and evite construir em encostas.</p>
+          <div class="dica-detalhes">
+            <p><strong>Sinais de alerta:</strong> Portas e janelas emperrando, árvores inclinadas, aparecimento de fendas.</p>
+            <p><strong>Em áreas de risco:</strong> Esteja atento a períodos de chuva intensa e monitore a situação.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== QUIZ PREVIEW ===== -->
+  <section class="quiz-preview">
+    <div class="container">
+      <div class="quiz-content">
+        <div class="quiz-text">
+          <h2>Teste seus conhecimentos</h2>
+          <p>Responda ao nosso quiz sobre Defesa Civil e descubra o quanto você sabe sobre prevenção de desastres.</p>
+          <a href="quiz.html" class="btn"><i class="fas fa-play"></i> Iniciar Quiz</a>
+        </div>
+        <div class="quiz-image">
+          <div class="quiz-visual">
+            <i class="fas fa-question-circle quiz-icon"></i>
+            <h3>Quiz Defesa Civil</h3>
+            <p>10 perguntas • Nível Médio • Certificado de participação</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NEWSLETTER ===== -->
+ 
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Expo Aprígio</h3>
+          <p>Apresentando trabalhos sobre Defesa Civil e cultura de prevenção.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-section">
+          <h3>Contato</h3>
+          <p><i class="fas fa-envelope"></i> contato@expoaprigio.com</p>
+          <p><i class="fas fa-phone"></i> (11) 2647-1491</p>
+          <div class="school-info">
+            <p><i class="fas fa-graduation-cap"></i> ETEC Professor Aprígio Gonzaga</p>
+            <p><i class="fas fa-map-marker-alt"></i> Av. Dr. Orêncio Vidigal 212, São Paulo, SP, 03640-010</p>
+            <p><i class="fas fa-clock"></i> Segunda a sexta: 07:00 - 17:00</p>
+            <p><i class="fas fa-globe"></i> www.etecaprigio.com.br</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Expo Aprígio - Todos os direitos reservados</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== CONTADOR REGRESSIVO =====
+    function updateDiagonalCounter() {
+      const eventDate = new Date('2025-10-25T10:00:00');
+      const now = new Date();
+      const diff = eventDate - now;
+
+      const counterDays = document.getElementById('counter-days');
+      const fullDias = document.getElementById('full-dias');
+      const fullHoras = document.getElementById('full-horas');
+      const fullMinutos = document.getElementById('full-minutos');
+      const fullSegundos = document.getElementById('full-segundos');
+
+      if (diff <= 0) {
+        counterDays.textContent = '00';
+        fullDias.textContent = '00';
+        fullHoras.textContent = '00';
+        fullMinutos.textContent = '00';
+        fullSegundos.textContent = '00';
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      counterDays.textContent = String(d).padStart(2, '0');
+      fullDias.textContent = String(d).padStart(2, '0');
+      fullHoras.textContent = String(h).padStart(2, '0');
+      fullMinutos.textContent = String(m).padStart(2, '0');
+      fullSegundos.textContent = String(s).padStart(2, '0');
+    }
+
+    setInterval(updateDiagonalCounter, 1000);
+    updateDiagonalCounter();
+
+    // ===== MENU HAMBURGUER =====
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.menu');
+
+    menuToggle.addEventListener('click', () => {
+      menu.classList.toggle('show');
+      const expanded = menu.classList.contains('show');
+      menuToggle.setAttribute('aria-expanded', expanded);
+      
+      const icon = menuToggle.querySelector('i');
+      if (expanded) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+      } else {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+      }
+    });
+
+    // Fechar menu ao clicar em um link (mobile)
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        menu.classList.remove('show');
+        menuToggle.querySelector('i').classList.remove('fa-times');
+        menuToggle.querySelector('i').classList.add('fa-bars');
+        menuToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // ===== CONTADOR COMPLETO =====
+    const counterCorner = document.getElementById('counter-corner');
+    const counterFull = document.getElementById('counter-full');
+    const closeFullCounter = document.getElementById('close-full-counter');
+
+    counterCorner.addEventListener('click', () => {
+      counterFull.style.display = 'block';
+    });
+
+    closeFullCounter.addEventListener('click', () => {
+      counterFull.style.display = 'none';
+    });
+
+    // Fechar modal ao clicar fora dele
+    window.addEventListener('click', (e) => {
+      if (e.target === counterFull) {
+        counterFull.style.display = 'none';
+      }
+    });
+
+    // ===== DICAS INTERATIVAS =====
+    function toggleDica(element) {
+      element.classList.toggle('ativo');
+    }
+
+    // ===== NEWSLETTER =====
+    const newsletterForm = document.querySelector('.newsletter-form');
+    newsletterForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = this.querySelector('input').value;
+      alert(`Obrigado por se inscrever com o email: ${email}. Você receberá nossas atualizações em breve!`);
+      this.reset();
+    });
+  </script>
+</body>
+</html>
